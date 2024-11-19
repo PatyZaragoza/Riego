@@ -1,0 +1,233 @@
+// Este es el primer codigo en arduino para el sistema de riego, falta implementar la camara
+
+// Patricia Zaragoza Palma
+
+//incluir bibliotecas
+#include <DHT.h>
+#include <Wire.h>
+#include <LiquidCrystal.h>
+LiquidCrystal lcd(7,6,5,4,3,2);
+
+//Definir el pin digital donde se conecta el sensor
+#define HT1 A0 ////sensor 1////
+#define HT2 A1 ////sendor2 ////
+#define HT3 A2 ////sendor 3////
+
+// dependiendo el tipo de sensor 
+#define DHTTYPE DHT11 //DHT 11
+
+//Inicializamos el sensor DHT11
+DHT dht1 (HT1, DHTTYPE);  // Inicializa el pin con el que trabajaremos y el tipo de sensor 
+DHT dht2 (HT1, DHTTYPE);
+DHT dht3 (HT3, DHTTYPE);
+
+////// sensor 1 //////
+int ref=30;
+int ref1=40;
+
+////// sendor 2 //////
+int ref2=30;
+int ref3=40;
+
+////// sendor 3 //////
+int ref4=30;
+int ref5=40;
+
+String linea1 = "H1:";
+String linea2 = "T1:";
+String linea3 = "H2:";
+String linea4 = "T2:";
+String linea5 = "H3:";
+String linea6 = "T3:";
+
+void setup(){
+  //inicializamos comunicacion lcd
+  lcd.begin (20,4);
+  //comenzamos los sensores DHT//
+
+  dht1.begin(); //inicializar el senor 1
+  dht2.begin(); // iniciamos el sensor 2
+  dht3.begin(); // iniciamos el sensor 3
+  ////Declaramos funcines que hagan lo spines ////
+
+  pinMode(A5,OUTPUT); //TEMPERATURA 1
+  pinMode(13,OUTPUT); //HUMEDAD 1
+  pinMode(A4,OUTPUT); //TEMPERATURA 2 
+  pinMode(A3,OUTPUT); //HUMEDAD 2
+  pinMode(12,OUTPUT); //TEMPERATURA 3
+  pinMode(11,OUTPUT); //HUMEDAD 3
+
+  ////MENSAJE DE BIENVENIDA ////
+  lcd.setCursor(0,0);
+  lcd.print("BIENVENIDO A CONTROL DE TEMPERATURA Y HUMEDAD");
+  delay(3000);
+  lcd.clear();
+
+}
+
+void loop() {
+  //Esperamos 5 segundos entre medidas
+  delay(5000);
+  ///////SENSOR 1//////
+  // LEAMOS LA HUMENDAD RELATIVA
+  float h = dht1.readHumidity();
+  // LEAMOS LA TEMPERATURA EN GRADOS CENTIGRADOS (POR DEFECTO)
+  float t = dht1.readTemperature();
+  // Leemos la temperatura en grados Fahrenheid
+  float f = dht1.readTemperature(true);
+
+  // Comprobamos si ha habido algun error en la lectura
+  if(isnan(h) || isnan(t) || isnan(f)){
+    lcd.println("ERROR OBTENIENDO LOS DATOS DEL SENSOR DHT11 ");
+    return;
+  }
+
+  /////// SENSOR 2 //////
+  //Leemos la humedad relativa 
+  float h2 = dht2.readHumidity();
+  // LEAMOS LA TEMPERATURA EN GRADOS CENTIGRADOS (POR DEFECTO)
+  float t2 = dht2.readTemperature();
+  // Leemos la temperatura en grados Fahrenheid
+  float f2 = dht2.readTemperature(true);
+
+ /////// SENSOR 3 //////
+  //Leemos la humedad relativa 
+  float h3 = dht3.readHumidity();
+  // LEAMOS LA TEMPERATURA EN GRADOS CENTIGRADOS (POR DEFECTO)
+  float t3 = dht3.readTemperature();
+  // Leemos la temperatura en grados Fahrenheid
+  float f3 = dht3.readTemperature(true);
+
+   // Comprobamos si ha habido algun error en la lectura
+   if(isnan(h2) || isnan(t2) || isnan(f2)){
+    lcd.println("ERROR OBTENIENDO LOS DATOS DEL SENSOR DHT11 ");
+    return;
+  }
+
+  lcd.setCursor(0,0);
+  lcd.print(linea1);
+  lcd.print(h);
+  lcd.print("%");
+  lcd.setCursor(10,0);
+  lcd.print(linea2);
+  lcd.print(t);
+  lcd.print("*C");
+
+  lcd.setCursor(0,1);
+  lcd.print(linea3);
+  lcd.print(h2);
+  lcd.print("%");
+  lcd.setCursor(10,1);
+  lcd.print(linea4);
+  lcd.print(t2);
+  lcd.print("*C");
+
+  lcd.setCursor(0,2);
+  lcd.print(linea5);
+  lcd.print(h3);
+  lcd.print("%");
+  lcd.setCursor(10,2);
+  lcd.print(linea6);
+  lcd.print(t3);
+  lcd.print("*C");
+
+  delay(2000);
+
+
+ //////SENDOR 1//////
+ if(t>ref){
+  digitalWrite(A5,HIGH);
+  lcd.setCursor(0,3);
+  lcd.print("FAN1 ON");
+  delay(1000);
+  lcd.clear();
+ }
+ else
+ {
+  digitalWrite(A5,LOW);
+  lcd.setCursor(0,3);
+  lcd.print("FAN1 OFF");
+  delay(1000);
+  lcd.clear();
+ }
+
+ if(h<ref1){
+  digitalWrite(13,HIGH);
+  lcd.setCursor(0,3);
+  lcd.print("PUMP1 ON");
+  delay(1000);
+  lcd.clear();
+ }
+ else{
+  digitalWrite(13,LOW);
+  lcd.setCursor(0,3);
+  lcd.print("PUMP1 OFF");
+  delay(1000);
+  lcd.clear();
+ }
+
+////////SENSOR 2 ///////
+  if(t2>ref2){
+  digitalWrite(A4,HIGH);
+  lcd.setCursor(0,3);
+  lcd.print("FAN2 ON");
+  delay(1000);
+  lcd.clear();
+ }
+ else
+ {
+  digitalWrite(A4,LOW);
+  lcd.setCursor(0,3);
+  lcd.print("FAN2 OFF");
+  delay(1000);
+  lcd.clear();
+ }
+
+ if(h2<ref3){
+  digitalWrite(A3,HIGH);
+  lcd.setCursor(0,3);
+  lcd.print("PUMP2 ON");
+  delay(1000);
+  lcd.clear();
+ }
+ else{
+  digitalWrite(A3,LOW);
+  lcd.setCursor(0,3);
+  lcd.print("PUMP2 OFF");
+  delay(1000);
+  lcd.clear();
+ }
+ //////// SENSOR 3////////
+  if(t3>ref4){
+  digitalWrite(12,HIGH);
+  lcd.setCursor(0,3);
+  lcd.print("FAN3 ON");
+  delay(1000);
+  lcd.clear();
+ }
+ else
+ {
+  digitalWrite(12,LOW);
+  lcd.setCursor(0,3);
+  lcd.print("FAN3 OFF");
+  delay(1000);
+  lcd.clear();
+ }
+
+ if(h3<ref5){
+  digitalWrite(11,HIGH);
+  lcd.setCursor(0,3);
+  lcd.print("PUMP3 ON");
+  delay(1000);
+  lcd.clear();
+ }
+ else{
+  digitalWrite(11,LOW);
+  lcd.setCursor(0,3);
+  lcd.print("PUMP3 OFF");
+  delay(1000);
+  lcd.clear();
+ }
+
+ delay(500);
+}
